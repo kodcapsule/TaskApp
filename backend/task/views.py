@@ -1,37 +1,28 @@
 # System imports
-from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.permissions import IsAdminUser
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+from django.shortcuts import redirect
+
 
 # User imports
-from .serializers import TaskCategorySerializer, UserProfileSerializer, UserSerializer, TaskSerializer
+from .serializers import TaskCategorySerializer, UserProfileSerializer, UserSerializer, TaskSerializer, UserLoginSerializer
 from .models import TaskCategory, UserProfile, Task
 
 
-# Create your views here.
-
+# FUNCTION BASED VIEWS
 
 def home(request):
     return HttpResponse('<h1>API DOCS</h1>')
 
 
-# FUNCTION BASED VIEWS
-
-# @api_view(['GET', "POST"])
-# def tasks(request):
-#     if request.method == "POST":
-#         return Response({"message": "this is a post reque"})
-#     if request.method == "GET":
-#         return Response({"message": "Hello Django"})
-
-
 # CLASS BASED VIEWS
-
-
 class TaskCategoryView(ListCreateAPIView):
     queryset = TaskCategory.objects.all()
     serializer_class = TaskCategorySerializer
@@ -40,6 +31,7 @@ class TaskCategoryView(ListCreateAPIView):
 class Users(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -57,8 +49,28 @@ class Users(ListCreateAPIView):
 class UserProfile(ListCreateAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsAdminUser]
 
 
 class Tasks(ListAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsAdminUser]
+
+
+#  Users login view
+class UserLogin(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(username=username, password=password)
+            if user:
+                token, created = Token.objects.get_or_create(user=user)
+                # return Response({'token': token.key}, status=status.HTTP_200_OK)
+                return Response({'message': 'Login successful. Redirecting...'}, status=status.HTTP_200_OK, headers={'Location': '/login-success/'})
+
+            else:
+                return Response({'error': 'Invalid credentials, check your username and password'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
