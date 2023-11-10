@@ -1,5 +1,5 @@
 # System imports
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -26,6 +26,8 @@ def home(request):
 class TaskCategoryView(ListCreateAPIView):
     queryset = TaskCategory.objects.all()
     serializer_class = TaskCategorySerializer
+
+# class-based views for performing actions on the Users model
 
 
 class Users(ListCreateAPIView):
@@ -58,10 +60,16 @@ class UserProfile(ListCreateAPIView):
     permission_classes = [IsAdminUser]
 
 
+# class-based views for performing actions on the task model
 class Tasks(ListAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAdminUser]
+
+
+class ReadUpdateTask (RetrieveUpdateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
 
 
 #  Users login view
