@@ -3,7 +3,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from django.views.generic import RedirectView
 
 
-from .views import home,  TaskCategoryView, Users, UserProfile, Tasks, UserLogin, UpdateReadDeleteUser,  ReadUpdateTask
+from .views import home,  TaskCategoryView, Users, UserProfile, Tasks, UserLogin, UpdateReadDeleteUser,  ReadUpdateTask, DeleteTask
 
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('tasks', Tasks.as_view(), name='user_profiles'),
     path('login', UserLogin.as_view(), name='login'),
     path('task/<str:pk>/', ReadUpdateTask.as_view(), name='retrieve-update-task'),
+    path('deleteTask/<str:pk>/', DeleteTask.as_view(), name='delete-task'),
     path('login-success/', RedirectView.as_view(url='/redirect-url/'),
          name='login-success'),
     path('user/<int:pk>/',

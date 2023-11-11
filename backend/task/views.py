@@ -1,5 +1,5 @@
 # System imports
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -61,10 +61,12 @@ class UserProfile(ListCreateAPIView):
 
 
 # class-based views for performing actions on the task model
+# Only admin users can read create , update and delete task.
+# An authenticated user can read and update task
 class Tasks(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -82,6 +84,12 @@ class Tasks(ListCreateAPIView):
 class ReadUpdateTask (RetrieveUpdateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+class DeleteTask(DestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAdminUser]
 
 
 #  Users login view
