@@ -61,10 +61,22 @@ class UserProfile(ListCreateAPIView):
 
 
 # class-based views for performing actions on the task model
-class Tasks(ListAPIView):
+class Tasks(ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAdminUser]
+    # permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            newTask = serializer.save()
+            data['title'] = newTask.title
+            data['description'] = newTask.description
+            data['priority'] = newTask.priority
+            data['status'] = newTask.status
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReadUpdateTask (RetrieveUpdateAPIView):

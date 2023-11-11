@@ -22,15 +22,20 @@ class UserProfile(models.Model):
 class Task(models.Model):
     PRIORITY = [('high', 'High'), ('medium', 'Medium'), ('low', 'Low')]
     STATUS = [('incomplete', 'Incomplete'), ('complete', 'Complete')]
+    CATEGORY = [('FE', 'FrontEnd'), ('BE', 'Backend'),
+                ('DV', 'DevOps'), ('UI/UX', 'UI/UX')]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
-    taskCategory = models.OneToOneField(
-        'TaskCategory', on_delete=models.CASCADE)
+    # taskCategory = models.OneToOneField(
+    #     'TaskCategory', on_delete=models.CASCADE,  null=True)
+    taskCategory = models.CharField(
+        max_length=600, choices=CATEGORY, default='Frontend')
     title = models.CharField(max_length=800, default='General Tasks')
     description = models.TextField(default='')
     due_date = models.DurationField()
     priority = models.CharField(max_length=100, choices=PRIORITY)
-    status = models.CharField(max_length=100, choices=STATUS)
+    status = models.CharField(
+        max_length=100, choices=STATUS, default='Incomplete')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
