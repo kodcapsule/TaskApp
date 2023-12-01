@@ -27,7 +27,13 @@ class TaskCategoryView(ListCreateAPIView):
     queryset = TaskCategory.objects.all()
     serializer_class = TaskCategorySerializer
 
-# class-based views for performing actions on the Users model
+
+# class-based views for performing actions on the Users
+'''
+Only admins can create, read  and delete users 
+A user can update his profile information 
+
+'''
 
 
 class Users(ListCreateAPIView):
@@ -102,9 +108,10 @@ class UserLogin(APIView):
             user = authenticate(username=username, password=password)
             if user:
                 token, created = Token.objects.get_or_create(user=user)
-                # return Response({'token': token.key}, status=status.HTTP_200_OK)
-                return Response({'message': 'Login successful. Redirecting...'}, status=status.HTTP_200_OK, headers={'Location': '/login-success/'})
-
+                print(token)
+                context = {'message': 'Login successful. Redirecting...',
+                           'username': username, 'password': password, 'token': token.key}
+                return Response(context, status=status.HTTP_200_OK, headers={'Location': '/login-success/'})
             else:
                 return Response({'error': 'Invalid credentials, check your username and password'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
