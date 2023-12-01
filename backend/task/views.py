@@ -7,6 +7,7 @@ from rest_framework import status
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
 
@@ -98,20 +99,50 @@ class DeleteTask(DestroyAPIView):
     permission_classes = [IsAdminUser]
 
 
+'''
+Implement user login and logouts for users
+'''
+
 #  Users login view
-class UserLogin(APIView):
+
+
+# class UserLogin(APIView):
+#     def post(self, request):
+#         serializer = UserLoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             username = serializer.validated_data['username']
+#             password = serializer.validated_data['password']
+#             user = authenticate(username=username, password=password)
+#             if user:
+#                 token, _ = Token.objects.get_or_create(user=user)
+#                 print(token)
+#                 context = {'message': 'Login successful. Redirecting...',
+#                            'username': username, 'password': password, 'token': token.key}
+#                 return Response(context, status=status.HTTP_200_OK, headers={'Location': '/login-success/'})
+#             else:
+#                 return Response({'error': 'Invalid credentials, check your username and password'}, status=status.HTTP_401_UNAUTHORIZED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogin(ObtainAuthToken):
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
-        if serializer.is_valid():
+        serializer = self.serializer_class(
+            data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
             user = authenticate(username=username, password=password)
             if user:
-                token, created = Token.objects.get_or_create(user=user)
-                print(token)
+                token, _ = Token.objects.get_or_create(user=user)
                 context = {'message': 'Login successful. Redirecting...',
                            'username': username, 'password': password, 'token': token.key}
                 return Response(context, status=status.HTTP_200_OK, headers={'Location': '/login-success/'})
             else:
                 return Response({'error': 'Invalid credentials, check your username and password'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogout(APIView):
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({'message': 'You have successfully logout'})
